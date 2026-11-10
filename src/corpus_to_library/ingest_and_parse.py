@@ -4,7 +4,7 @@ import os
 import uuid
 from typing import Optional
 import boto3
-import fitz  # PyMuPDF
+import pymupdf  # PyMuPDF
 from google import genai
 from google.genai import types
 from corpus_to_library.metadata import BibliographicMetadata
@@ -37,7 +37,7 @@ def get_pdf_slice(pdf_bytes: bytes) -> bytes:
     - total pages < 10  -> first 3 pages (indices 0..2)
     - total pages >= 10 -> first 5 pages (indices 0..4)
     """
-    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
     total_pages = len(doc)
     
     if total_pages < 10:
@@ -45,7 +45,7 @@ def get_pdf_slice(pdf_bytes: bytes) -> bytes:
     else:
         max_pages = min(5, total_pages)
 
-    sliced_doc = fitz.open()
+    sliced_doc = pymupdf.open()
     sliced_doc.insert_pdf(doc, from_page=0, to_page=max_pages - 1)
     
     sliced_bytes = sliced_doc.tobytes()
