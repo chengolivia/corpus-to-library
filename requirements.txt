@@ -1,0 +1,28 @@
+
+# Gemini API
+google-genai>=2.0.0,<3.0.0
+
+# PDF processing
+PyMuPDF>=1.24,<2.0
+Pillow>=10.0,<13.0
+
+# AWS / S3
+boto3>=1.35,<2.0
+
+# HTTP requests (OpenAlex, Crossref)
+requests>=2.32,<3.0
+
+# Data validation and structured output
+pydantic>=2.7,<3.0
+orjson>=3.10,<4.0
+
+# Retry handling and rate limiting
+tenacity>=9.0,<10.0
+
+# Utilities
+python-dotenv>=1.0,<2.0
+tqdm>=4.66,<5.0
+rapidfuzz>=3.9,<4.0
+
+# PostgreSQL
+psycopg[binary]>=3.2,<4.0
