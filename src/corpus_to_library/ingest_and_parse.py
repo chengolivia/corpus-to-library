@@ -43,21 +43,29 @@ def get_pdf_slice(pdf_bytes: bytes) -> bytes:
     - total pages < 10  -> first 3 pages (indices 0..2)
     - total pages >= 10 -> first 5 pages (indices 0..4)
     """
-    doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
-    total_pages = len(doc)
-    
-    if total_pages < 10:
-        max_pages = min(3, total_pages)
-    else:
-        max_pages = min(5, total_pages)
+    try:
+        doc = pymupdf.open(stream=pdf_bytes, filetype="pdf")
+        if doc.is_encrypted or doc.needs_pass or len(doc) == 0:
+            print("doc encrypted or other issue")
+            doc.close()
+            return None
+        total_pages = len(doc)
+        
+        if total_pages < 10:
+            max_pages = min(3, total_pages)
+        else:
+            max_pages = min(5, total_pages)
 
-    sliced_doc = pymupdf.open()
-    sliced_doc.insert_pdf(doc, from_page=0, to_page=max_pages - 1)
-    
-    sliced_bytes = sliced_doc.tobytes()
-    sliced_doc.close()
-    doc.close()
-    return sliced_bytes
+        sliced_doc = pymupdf.open()
+        sliced_doc.insert_pdf(doc, from_page=0, to_page=max_pages - 1)
+        
+        sliced_bytes = sliced_doc.tobytes()
+        sliced_doc.close()
+        doc.close()
+        return sliced_bytes
+    except Excecption:
+        print("PDF slice failed")
+        return None
 
 
 def process_single_pdf(key: str) -> Optional[dict]:
@@ -74,6 +82,10 @@ def process_single_pdf(key: str) -> Optional[dict]:
         
         # 3. Slice PDF
         slice_bytes = get_pdf_slice(pdf_bytes)
+        if slice_bytes is None:
+            print(f"  Skipping corrupt or unparseable PDF: {key}")
+            return None
+        
         
         # 4. Gemini API Call with Structured Output
         api_response = client.models.generate_content(
