@@ -14,7 +14,8 @@ from dotenv import load_dotenv
 # ==========================================
 # CONFIGURATION
 # ==========================================
-BUCKET_NAME = os.getenv(S3_BUCKET_NAME)
+load_dotenv()
+BUCKET_NAME = os.getenv("S3_BUCKET_NAME")
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 OUTPUT_JSONL = f"extracted_metadata_{timestamp}.jsonl"
 S3_OUTPUT_KEY = f"extracted_metadata/{OUTPUT_JSONL}"  # Target S3 destination path
