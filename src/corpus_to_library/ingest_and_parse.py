@@ -9,11 +9,12 @@ from google import genai
 from google.genai import types
 from corpus_to_library.metadata import BibliographicMetadata
 from datetime import datetime
+from dotenv import load_dotenv
 
 # ==========================================
 # CONFIGURATION
 # ==========================================
-BUCKET_NAME = "bigml-project-corpus-900136791625-us-east-2-an"
+BUCKET_NAME = os.getenv(S3_BUCKET_NAME)
 timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 OUTPUT_JSONL = f"extracted_metadata_{timestamp}.jsonl"
 S3_OUTPUT_KEY = f"extracted_metadata/{OUTPUT_JSONL}"  # Target S3 destination path
@@ -27,7 +28,7 @@ Use null for missing values. Do not guess.
 
 # Initialize Clients
 s3 = boto3.client("s3")
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 
 # ==========================================
