@@ -8,13 +8,15 @@ import pymupdf  # PyMuPDF
 from google import genai
 from google.genai import types
 from corpus_to_library.metadata import BibliographicMetadata
+from datetime import datetime
 
 # ==========================================
 # CONFIGURATION
 # ==========================================
 BUCKET_NAME = "bigml-project-corpus-900136791625-us-east-2-an"
-OUTPUT_JSONL = "extracted_metadata.jsonl"
-S3_OUTPUT_KEY = "extracted_metadata/extracted_metadata.jsonl"  # Target S3 destination path
+timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+OUTPUT_JSONL = f"extracted_metadata_{timestamp}.jsonl"
+S3_OUTPUT_KEY = f"extracted_metadata/{OUTPUT_JSONL}"  # Target S3 destination path
 MODEL_ID = "gemini-3.5-flash-lite"
 
 PROMPT = """
