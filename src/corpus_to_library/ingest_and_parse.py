@@ -118,16 +118,21 @@ def run_pipeline(max_docs: Optional[int] = None, num_threads: int = 5):
     pages = paginator.paginate(Bucket=BUCKET_NAME)
     
     # Gather target S3 PDF keys
+    TARGET_FOLDERS = ("google-drive-files/", "icloud-drive-files/")
+
     pdf_keys = []
     for page in pages:
         if "Contents" not in page:
             continue
         for obj in page["Contents"]:
             key = obj["Key"]
-            if key.lower().endswith(".pdf"):
+            
+            # Check that key belongs to one of the target folders AND ends with .pdf
+            if key.startswith(TARGET_FOLDERS) and key.lower().endswith(".pdf"):
                 pdf_keys.append(key)
                 if max_docs is not None and len(pdf_keys) >= max_docs:
                     break
+                    
         if max_docs is not None and len(pdf_keys) >= max_docs:
             break
 
