@@ -1,3 +1,4 @@
+import argparse
 import concurrent.futures
 import json
 import os
@@ -18,6 +19,7 @@ timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
 OUTPUT_JSONL = f"extracted_metadata_{timestamp}.jsonl"
 S3_OUTPUT_KEY = f"extracted_metadata/{OUTPUT_JSONL}"  # Target S3 destination path
 MODEL_ID = "gemini-3.5-flash-lite"
+TARGET_FOLDERS = ("google-drive-files/", "icloud-drive-files/")
 
 PROMPT = """
 Extract the bibliographic metadata from this document slice.
@@ -115,24 +117,23 @@ def run_pipeline(max_docs: Optional[int] = None, num_threads: int = 5):
     :param num_threads: Number of parallel worker threads / API calls.
     """
     paginator = s3.get_paginator("list_objects_v2")
-    pages = paginator.paginate(Bucket=BUCKET_NAME)
     
     # Gather target S3 PDF keys
-    TARGET_FOLDERS = ("google-drive-files/", "icloud-drive-files/")
 
     pdf_keys = []
-    for page in pages:
-        if "Contents" not in page:
-            continue
-        for obj in page["Contents"]:
-            key = obj["Key"]
-            
-            # Check that key belongs to one of the target folders AND ends with .pdf
-            if key.startswith(TARGET_FOLDERS) and key.lower().endswith(".pdf"):
-                pdf_keys.append(key)
-                if max_docs is not None and len(pdf_keys) >= max_docs:
-                    break
-                    
+    for folder in TARGET_FOLDERS:
+        pages = paginator.paginate(Bucket=BUCKET_NAME, Prefix=folder)
+        for page in pages:
+            if "Contents" not in page:
+                continue
+            for obj in page["Contents"]:
+                key = obj["Key"]
+                if key.lower().endswith(".pdf"):
+                    pdf_keys.append(key)
+                    if max_docs is not None and len(pdf_keys) >= max_docs:
+                        break
+            if max_docs is not None and len(pdf_keys) >= max_docs:
+                break
         if max_docs is not None and len(pdf_keys) >= max_docs:
             break
 
@@ -170,4 +171,22 @@ def run_pipeline(max_docs: Optional[int] = None, num_threads: int = 5):
 
 
 if __name__ == "__main__":
-    run_pipeline(max_docs=5, num_threads=5)
+    parser = argparse.ArgumentParser(
+        description="Run PDF metadata extraction pipeline on S3 corpus."
+    )
+    parser.add_argument(
+        "--max-docs",
+        type=int,
+        default=None,
+        help="Maximum number of documents to process. Omit or set to None to process all documents.",
+    )
+    parser.add_argument(
+        "--num-threads",
+        type=int,
+        default=5,
+        help="Number of concurrent threads / API calls (default: 5).",
+    )
+
+    args = parser.parse_args()
+
+    run_pipeline(max_docs=args.max_docs, num_threads=args.num_threads)
