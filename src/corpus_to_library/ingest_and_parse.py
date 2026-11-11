@@ -63,7 +63,7 @@ def get_pdf_slice(pdf_bytes: bytes) -> bytes:
         sliced_doc.close()
         doc.close()
         return sliced_bytes
-    except Excecption:
+    except Exception:
         print("PDF slice failed")
         return None
 
