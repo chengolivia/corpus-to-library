@@ -2,17 +2,19 @@
 import requests
 import boto3
 import polars as pl
-
+import os
+from dotenv import load_dotenv
+import argparse
 from io import BytesIO
 
-
+load_dotenv()
 # Configuration
 BASE_URL = "https://api.crossref.org/works"
 
-SOURCE_BUCKET = "your-bucket"
+SOURCE_BUCKET = os.getenv("S3_BUCKET_NAME")
 SOURCE_KEY = "path/to/input.parquet"
 
-DEST_BUCKET = "your-bucket"
+DEST_BUCKET = os.getenv("S3_BUCKET_NAME")
 DEST_KEY = "path/to/output.parquet"
 
 MAILTO = "your-email@example.com"
@@ -198,10 +200,25 @@ def process_s3_parquet(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--source-key",
+        required=True,
+        help="S3 key of input Parquet file",
+    )
+
+    parser.add_argument(
+        "--dest-key",
+        required=True,
+        help="S3 key of output Parquet file",
+    )
+
+    args = parser.parse_args()
 
     result = process_s3_parquet(
         source_bucket=SOURCE_BUCKET,
-        source_key=SOURCE_KEY,
+        source_key=args.source_key,
         dest_bucket=DEST_BUCKET,
-        dest_key=DEST_KEY,
+        dest_key=args.dest_key,
     )
