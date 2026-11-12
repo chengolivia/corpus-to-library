@@ -19,7 +19,7 @@ def jsonl_to_parquet(source_key, dest_key):
     # 2. Parse JSON with Polars
     # Use pl.read_json() for standard JSON arrays: [{"id": 1}, {"id": 2}]
     # Use pl.read_ndjson() for newline-delimited JSON: {"id": 1}\n{"id": 2}
-    df = pl.read_ndjson(json_buffer)
+    df = pl.read_ndjson(json_buffer, infer_schema_length=None)
 
     # 3. Write DataFrame to an in-memory Parquet buffer
     parquet_buffer = io.BytesIO()
